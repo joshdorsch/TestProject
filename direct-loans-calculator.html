@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Direct Loans Calculator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    h1 { font-size: 1.5rem; font-weight: 700; }
+    h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem; }
+
+    .subtitle { font-size: 0.85rem; color: #64748b; margin-top: 0.2rem; }
+
+    /* Disclaimer */
+    .disclaimer {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: #1e40af;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Cards */
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    /* Form grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 0.3rem;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      color: #1e293b;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    select:focus, input[type="number"]:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+
+    /* Summary cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .summary-card {
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      border: 1px solid;
+    }
+
+    .summary-card.blue   { background: #eff6ff; border-color: #bfdbfe; }
+    .summary-card.orange { background: #fff7ed; border-color: #fed7aa; }
+    .summary-card.red    { background: #fef2f2; border-color: #fecaca; }
+    .summary-card.green  { background: #f0fdf4; border-color: #bbf7d0; }
+
+    .summary-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .blue   .summary-label { color: #2563eb; }
+    .orange .summary-label { color: #ea580c; }
+    .red    .summary-label { color: #dc2626; }
+    .green  .summary-label { color: #16a34a; }
+
+    .summary-amount {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .blue   .summary-amount { color: #1e40af; }
+    .orange .summary-amount { color: #9a3412; }
+    .red    .summary-amount { color: #991b1b; }
+    .green  .summary-amount { color: #14532d; }
+
+    .summary-note {
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+    }
+
+    .blue   .summary-note { color: #2563eb; }
+    .orange .summary-note { color: #ea580c; }
+    .red    .summary-note { color: #dc2626; }
+    .green  .summary-note { color: #16a34a; }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+
+    thead tr { background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+
+    th {
+      padding: 0.65rem 0.9rem;
+      text-align: right;
+      font-weight: 600;
+      font-size: 0.78rem;
+      white-space: nowrap;
+      color: #475569;
+    }
+
+    th:first-child, th:nth-child(2) { text-align: left; }
+    th.blue  { color: #2563eb; }
+    th.orange { color: #ea580c; }
+
+    tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
+    tbody tr:hover { background: #f8fafc; }
+
+    td {
+      padding: 0.65rem 0.9rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    td:first-child { text-align: left; font-weight: 600; color: #1e293b; }
+    td:nth-child(2) { text-align: left; color: #64748b; }
+    td.blue   { color: #2563eb; font-weight: 500; }
+    td.orange { color: #ea580c; font-weight: 500; }
+    td.red    { color: #dc2626; font-weight: 600; }
+    td.muted  { color: #94a3b8; }
+
+    /* Notes */
+    .notes {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+    }
+
+    .notes h3 { font-size: 0.85rem; font-weight: 600; color: #92400e; margin-bottom: 0.5rem; }
+
+    .notes ul { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .notes li {
+      font-size: 0.82rem;
+      color: #b45309;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .notes li::before { content: "•"; flex-shrink: 0; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.2rem; }
+      .summary-amount { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div style="margin-bottom:1.25rem">
+    <h1>Direct Loans Calculator</h1>
+    <p class="subtitle">Aggregate limit reduction schedule &middot; Year-by-year borrowing plan</p>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> Proposed limits are based on ED rulemaking discussions as of early 2026.
+    Verify all figures against the applicable final rule before advising borrowers.
+  </div>
+
+  <!-- Form -->
+  <div class="card">
+    <h2>Borrower Profile</h2>
+    <div class="form-grid">
+      <div>
+        <label for="studentType">Student Type</label>
+        <select id="studentType">
+          <option value="dependent-ug">Dependent Undergraduate</option>
+          <option value="independent-ug">Independent Undergraduate</option>
+          <option value="graduate" selected>Graduate / Professional</option>
+        </select>
+      </div>
+      <div>
+        <label for="programLength">Program Length</label>
+        <select id="programLength">
+          <option value="1">1 year</option>
+          <option value="2">2 years</option>
+          <option value="3" selected>3 years</option>
+          <option value="4">4 years</option>
+          <option value="5">5 years</option>
+          <option value="6">6 years</option>
+        </select>
+      </div>
+      <div>
+        <label for="startYear">Program Start AY</label>
+        <select id="startYear">
+          <option value="2025">2025&ndash;26</option>
+          <option value="2026" selected>2026&ndash;27</option>
+          <option value="2027">2027&ndash;28</option>
+          <option value="2028">2028&ndash;29</option>
+          <option value="2029">2029&ndash;30</option>
+          <option value="2030">2030&ndash;31</option>
+        </select>
+      </div>
+      <div>
+        <label for="alreadyBorrowed">Already Borrowed ($)</label>
+        <input id="alreadyBorrowed" type="number" min="0" step="500" value="0"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-card blue">
+      <div class="summary-label">Borrowable &mdash; Current Rules</div>
+      <div class="summary-amount" id="sumCurrent"></div>
+      <div class="summary-note" id="sumCurrentNote"></div>
+    </div>
+    <div class="summary-card orange">
+      <div class="summary-label">Borrowable &mdash; Proposed Rules</div>
+      <div class="summary-amount" id="sumProposed"></div>
+      <div class="summary-note" id="sumProposedNote"></div>
+    </div>
+    <div class="summary-card" id="gapCard">
+      <div class="summary-label" id="gapLabel">Borrowing Gap</div>
+      <div class="summary-amount" id="gapAmount"></div>
+      <div class="summary-note" id="gapNote"></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div style="padding:1.1rem 1.25rem; border-bottom:1px solid #e2e8f0;">
+      <h2 style="margin-bottom:0.2rem">Year-by-Year Borrowing Schedule</h2>
+      <p class="subtitle">Annual limits and cumulative borrowing — current vs. proposed rules</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>AY</th>
+            <th>Year</th>
+            <th class="blue">Annual (Current)</th>
+            <th class="orange">Annual (Proposed)</th>
+            <th>Reduction</th>
+            <th class="blue">Cumulative (Current)</th>
+            <th class="orange">Cumulative (Proposed)</th>
+            <th class="blue">Remaining (Current)</th>
+            <th class="orange">Remaining (Proposed)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="notes">
+    <h3>Regulatory Notes</h3>
+    <ul id="notesList"></ul>
+  </div>
+
+</div>
+<script>
+  const LIMITS = {
+    'dependent-ug': {
+      byYear: [
+        { cur: 5500,  prop: 5500  },
+        { cur: 6500,  prop: 6500  },
+        { cur: 7500,  prop: 7500  },
+        { cur: 7500,  prop: 7500  },
+      ],
+      aggCur: 31000, aggProp: 31000,
+      notes: [
+        'Annual and aggregate limits unchanged under current proposals.',
+        'Confirm against the final rule before advising students.',
+      ]
+    },
+    'independent-ug': {
+      byYear: [
+        { cur: 9500,  prop: 9500  },
+        { cur: 10500, prop: 10500 },
+        { cur: 12500, prop: 12500 },
+        { cur: 12500, prop: 12500 },
+      ],
+      aggCur: 57500, aggProp: 57500,
+      notes: [
+        'Annual and aggregate limits unchanged under current proposals.',
+        'Confirm against the final rule before advising students.',
+      ]
+    },
+    'graduate': {
+      byYear: [
+        { cur: 20500, prop: 17500 }, // AY 2026-27 phase-in
+        { cur: 20500, prop: 14000 }, // AY 2027-28+
+        { cur: 20500, prop: 14000 },
+        { cur: 20500, prop: 14000 },
+      ],
+      aggCur: 138500, aggProp: 100000,
+      notes: [
+        'Proposed rule (ED NPRM Feb 2025) would reduce annual limit: $17,500 in AY 2026-27, then $14,000 from AY 2027-28 onward.',
+        'Proposed aggregate cap reduced from $138,500 to $100,000.',
+        'Phase-in schedule subject to change — verify against final rule.',
+      ]
+    }
+  };
+
+  const fmt = n => '$' + n.toLocaleString('en-US');
+
+  function calculate() {
+    const type        = document.getElementById('studentType').value;
+    const length      = parseInt(document.getElementById('programLength').value);
+    const startYear   = parseInt(document.getElementById('startYear').value);
+    const alreadyBorrowed = Math.max(0, parseInt(document.getElementById('alreadyBorrowed').value) || 0);
+
+    const sched = LIMITS[type];
+    let cumCur  = alreadyBorrowed;
+    let cumProp = alreadyBorrowed;
+    const rows  = [];
+
+    for (let i = 0; i < length; i++) {
+      const lim = sched.byYear[Math.min(i, sched.byYear.length - 1)];
+      const ay  = startYear + i;
+
+      const annCur  = Math.max(0, Math.min(lim.cur,  sched.aggCur  - cumCur));
+      const annProp = Math.max(0, Math.min(lim.prop, sched.aggProp - cumProp));
+
+      cumCur  = Math.min(cumCur  + annCur,  sched.aggCur);
+      cumProp = Math.min(cumProp + annProp, sched.aggProp);
+
+      rows.push({
+        ay: `${ay}–${String(ay + 1).slice(-2)}`,
+        year: i + 1,
+        annCur, annProp,
+        reduction: annCur - annProp,
+        cumCur, cumProp,
+        remCur:  Math.max(0, sched.aggCur  - cumCur),
+        remProp: Math.max(0, sched.aggProp - cumProp),
+      });
+    }
+
+    const totalCur  = rows.reduce((s, r) => s + r.annCur,  0);
+    const totalProp = rows.reduce((s, r) => s + r.annProp, 0);
+    const gap = totalCur - totalProp;
+
+    // Summary cards
+    document.getElementById('sumCurrent').textContent  = fmt(totalCur);
+    document.getElementById('sumCurrentNote').textContent = `Aggregate cap: ${fmt(sched.aggCur)}`;
+    document.getElementById('sumProposed').textContent = fmt(totalProp);
+    document.getElementById('sumProposedNote').textContent = `Proposed aggregate cap: ${fmt(sched.aggProp)}`;
+
+    const gapCard   = document.getElementById('gapCard');
+    const gapAmount = document.getElementById('gapAmount');
+    const gapNote   = document.getElementById('gapNote');
+    gapCard.className = 'summary-card ' + (gap > 0 ? 'red' : 'green');
+    gapAmount.textContent = gap > 0 ? `−${fmt(gap)}` : '$0';
+    gapNote.textContent   = gap > 0 ? 'Less available under proposed rules' : 'No reduction impact for this profile';
+
+    // Table
+    document.getElementById('tableBody').innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.ay}</td>
+        <td>Year ${r.year}</td>
+        <td class="blue">${fmt(r.annCur)}</td>
+        <td class="orange">${fmt(r.annProp)}</td>
+        <td class="${r.reduction > 0 ? 'red' : 'muted'}">${r.reduction > 0 ? '−' + fmt(r.reduction) : '—'}</td>
+        <td class="blue">${fmt(r.cumCur)}</td>
+        <td class="orange">${fmt(r.cumProp)}</td>
+        <td class="blue">${fmt(r.remCur)}</td>
+        <td class="orange">${fmt(r.remProp)}</td>
+      </tr>
+    `).join('');
+
+    // Notes
+    document.getElementById('notesList').innerHTML = sched.notes
+      .map(n => `<li>${n}</li>`).join('');
+  }
+
+  ['studentType','programLength','startYear','alreadyBorrowed']
+    .forEach(id => document.getElementById(id).addEventListener('change', calculate));
+
+  calculate();
+</script>
+</body>
+</html>
