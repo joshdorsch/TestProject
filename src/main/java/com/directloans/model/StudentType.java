@@ -3,7 +3,8 @@ package com.directloans.model;
 public enum StudentType {
     DEPENDENT_UG("dependent-ug", "Dependent Undergraduate"),
     INDEPENDENT_UG("independent-ug", "Independent Undergraduate"),
-    GRADUATE("graduate", "Graduate / Professional");
+    GRADUATE("graduate", "Graduate (non-professional)"),
+    PROFESSIONAL("professional", "Professional Degree (law, medicine, etc.)");
 
     private final String value;
     private final String label;

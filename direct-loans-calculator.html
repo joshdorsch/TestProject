@@ -203,8 +203,9 @@
   </div>
 
   <div class="disclaimer">
-    <strong>Disclaimer:</strong> Proposed limits are based on ED rulemaking discussions as of early 2026.
-    Verify all figures against the applicable final rule before advising borrowers.
+    <strong>Disclaimer:</strong> "New Rules" figures reflect the <strong>One Big Beautiful Bill Act (OBBB, P.L. 119-21)</strong>,
+    signed July 4, 2025, effective July 1, 2026 for new borrowers. Implementing regulations were proposed January 30, 2026
+    (NPRM 2026-01912) and are pending final rule publication. Verify all figures against the final rule before advising borrowers.
   </div>
 
   <!-- Form -->
@@ -216,7 +217,8 @@
         <select id="studentType">
           <option value="dependent-ug">Dependent Undergraduate</option>
           <option value="independent-ug">Independent Undergraduate</option>
-          <option value="graduate" selected>Graduate / Professional</option>
+          <option value="graduate" selected>Graduate (non-professional)</option>
+          <option value="professional">Professional Degree (law, medicine, etc.)</option>
         </select>
       </div>
       <div>
@@ -271,7 +273,7 @@
   <div class="card" style="padding:0; overflow:hidden;">
     <div style="padding:1.1rem 1.25rem; border-bottom:1px solid #e2e8f0;">
       <h2 style="margin-bottom:0.2rem">Year-by-Year Borrowing Schedule</h2>
-      <p class="subtitle">Annual limits and cumulative borrowing — current vs. proposed rules</p>
+      <p class="subtitle">Annual limits and cumulative borrowing — pre-OBBB vs. OBBB new rules (July 1, 2026+)</p>
     </div>
     <div class="table-wrap">
       <table>
@@ -280,12 +282,12 @@
             <th>AY</th>
             <th>Year</th>
             <th class="blue">Annual (Current)</th>
-            <th class="orange">Annual (Proposed)</th>
-            <th>Reduction</th>
+            <th class="orange">Annual (OBBB)</th>
+            <th>Change</th>
             <th class="blue">Cumulative (Current)</th>
-            <th class="orange">Cumulative (Proposed)</th>
+            <th class="orange">Cumulative (OBBB)</th>
             <th class="blue">Remaining (Current)</th>
-            <th class="orange">Remaining (Proposed)</th>
+            <th class="orange">Remaining (OBBB)</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -301,45 +303,74 @@
 
 </div>
 <script>
+  // Source: One Big Beautiful Bill Act (OBBB, P.L. 119-21), signed July 4, 2025.
+  // Effective July 1, 2026 for new borrowers. Implementing regs pending final rule.
   const LIMITS = {
     'dependent-ug': {
       byYear: [
-        { cur: 5500,  prop: 5500  },
-        { cur: 6500,  prop: 6500  },
-        { cur: 7500,  prop: 7500  },
-        { cur: 7500,  prop: 7500  },
+        { cur: 5500,  obbb: 5500  },
+        { cur: 6500,  obbb: 6500  },
+        { cur: 7500,  obbb: 7500  },
+        { cur: 7500,  obbb: 7500  },
       ],
-      aggCur: 31000, aggProp: 31000,
+      aggCur: 31000, aggObbb: 31000,
       notes: [
-        'Annual and aggregate limits unchanged under current proposals.',
-        'Confirm against the final rule before advising students.',
+        'Undergraduate annual and aggregate limits are unchanged under OBBB.',
+        'Confirm against the final implementing rule before advising students.',
       ]
     },
     'independent-ug': {
       byYear: [
-        { cur: 9500,  prop: 9500  },
-        { cur: 10500, prop: 10500 },
-        { cur: 12500, prop: 12500 },
-        { cur: 12500, prop: 12500 },
+        { cur: 9500,  obbb: 9500  },
+        { cur: 10500, obbb: 10500 },
+        { cur: 12500, obbb: 12500 },
+        { cur: 12500, obbb: 12500 },
       ],
-      aggCur: 57500, aggProp: 57500,
+      aggCur: 57500, aggObbb: 57500,
       notes: [
-        'Annual and aggregate limits unchanged under current proposals.',
-        'Confirm against the final rule before advising students.',
+        'Undergraduate annual and aggregate limits are unchanged under OBBB.',
+        'Confirm against the final implementing rule before advising students.',
       ]
     },
     'graduate': {
+      // OBBB: annual limit unchanged at $20,500; aggregate reduced $138,500 → $100,000.
+      // Grad PLUS loans eliminated for new borrowers on/after July 1, 2026.
       byYear: [
-        { cur: 20500, prop: 17500 }, // AY 2026-27 phase-in
-        { cur: 20500, prop: 14000 }, // AY 2027-28+
-        { cur: 20500, prop: 14000 },
-        { cur: 20500, prop: 14000 },
+        { cur: 20500, obbb: 20500 },
+        { cur: 20500, obbb: 20500 },
+        { cur: 20500, obbb: 20500 },
+        { cur: 20500, obbb: 20500 },
       ],
-      aggCur: 138500, aggProp: 100000,
+      aggCur: 138500, aggObbb: 100000,
       notes: [
-        'Proposed rule (ED NPRM Feb 2025) would reduce annual limit: $17,500 in AY 2026-27, then $14,000 from AY 2027-28 onward.',
-        'Proposed aggregate cap reduced from $138,500 to $100,000.',
-        'Phase-in schedule subject to change — verify against final rule.',
+        'OBBB (P.L. 119-21): Annual Direct Unsubsidized limit unchanged at $20,500.',
+        'Aggregate cap reduced from $138,500 to $100,000 for new borrowers on/after July 1, 2026.',
+        'Graduate PLUS loans eliminated for new borrowers on/after July 1, 2026 — a significant reduction in total available aid beyond these Direct Loan figures.',
+        'Legacy provision: students already enrolled before July 1, 2026 may continue under prior rules for up to 3 additional years or degree completion, whichever is sooner.',
+        'Implementing regulations (NPRM 2026-01912, published Jan 30, 2026) pending final rule — verify before advising.',
+      ]
+    },
+    'professional': {
+      // OBBB: new category for qualifying professional degree programs.
+      // 11 defined fields: Law (J.D./L.L.B.), Medicine (M.D.), Osteopathic Medicine (D.O.),
+      // Dentistry (D.D.S./D.M.D.), Pharmacy (Pharm.D.), Veterinary Medicine (D.V.M.),
+      // Optometry (O.D.), Chiropractic (D.C.), Podiatry (D.P.M.), Theology (M.Div./M.H.L.),
+      // Clinical Psychology (Psy.D./Ph.D.).
+      // Current (pre-OBBB): treated as graduate — $20,500 annual / $138,500 aggregate.
+      byYear: [
+        { cur: 20500, obbb: 50000 },
+        { cur: 20500, obbb: 50000 },
+        { cur: 20500, obbb: 50000 },
+        { cur: 20500, obbb: 50000 },
+      ],
+      aggCur: 138500, aggObbb: 200000,
+      notes: [
+        'OBBB (P.L. 119-21): New "professional degree" category effective July 1, 2026 for qualifying new borrowers.',
+        'Annual limit increases from $20,500 to $50,000; aggregate increases from $138,500 to $200,000.',
+        'Qualifying fields (11 defined): Law (J.D.), Medicine (M.D.), Osteopathic Medicine (D.O.), Dentistry (D.D.S./D.M.D.), Pharmacy (Pharm.D.), Veterinary Medicine (D.V.M.), Optometry (O.D.), Chiropractic (D.C.), Podiatry (D.P.M.), Theology (M.Div./M.H.L.), Clinical Psychology (Psy.D./Ph.D.).',
+        'Many programs that may seem "professional" (nursing, PA, PT, OT, social work, public health, etc.) are classified as "graduate" under OBBB — use the Graduate category for those.',
+        'Grad PLUS eliminated for all graduate/professional new borrowers on/after July 1, 2026.',
+        'Confirm program classification against the final implementing rule (NPRM 2026-01912) before advising.',
       ]
     }
   };
@@ -354,7 +385,7 @@
 
     const sched = LIMITS[type];
     let cumCur  = alreadyBorrowed;
-    let cumProp = alreadyBorrowed;
+    let cumObbb = alreadyBorrowed;
     const rows  = [];
 
     for (let i = 0; i < length; i++) {
@@ -362,53 +393,68 @@
       const ay  = startYear + i;
 
       const annCur  = Math.max(0, Math.min(lim.cur,  sched.aggCur  - cumCur));
-      const annProp = Math.max(0, Math.min(lim.prop, sched.aggProp - cumProp));
+      const annObbb = Math.max(0, Math.min(lim.obbb, sched.aggObbb - cumObbb));
 
       cumCur  = Math.min(cumCur  + annCur,  sched.aggCur);
-      cumProp = Math.min(cumProp + annProp, sched.aggProp);
+      cumObbb = Math.min(cumObbb + annObbb, sched.aggObbb);
 
       rows.push({
         ay: `${ay}–${String(ay + 1).slice(-2)}`,
         year: i + 1,
-        annCur, annProp,
-        reduction: annCur - annProp,
-        cumCur, cumProp,
+        annCur, annObbb,
+        change: annObbb - annCur,
+        cumCur, cumObbb,
         remCur:  Math.max(0, sched.aggCur  - cumCur),
-        remProp: Math.max(0, sched.aggProp - cumProp),
+        remObbb: Math.max(0, sched.aggObbb - cumObbb),
       });
     }
 
     const totalCur  = rows.reduce((s, r) => s + r.annCur,  0);
-    const totalProp = rows.reduce((s, r) => s + r.annProp, 0);
-    const gap = totalCur - totalProp;
+    const totalObbb = rows.reduce((s, r) => s + r.annObbb, 0);
+    const gap = totalCur - totalObbb; // positive = reduction, negative = increase
 
     // Summary cards
-    document.getElementById('sumCurrent').textContent  = fmt(totalCur);
+    document.getElementById('sumCurrent').textContent = fmt(totalCur);
     document.getElementById('sumCurrentNote').textContent = `Aggregate cap: ${fmt(sched.aggCur)}`;
-    document.getElementById('sumProposed').textContent = fmt(totalProp);
-    document.getElementById('sumProposedNote').textContent = `Proposed aggregate cap: ${fmt(sched.aggProp)}`;
+    document.getElementById('sumProposed').textContent = fmt(totalObbb);
+    document.getElementById('sumProposedNote').textContent = `OBBB aggregate cap: ${fmt(sched.aggObbb)}`;
 
     const gapCard   = document.getElementById('gapCard');
     const gapAmount = document.getElementById('gapAmount');
     const gapNote   = document.getElementById('gapNote');
-    gapCard.className = 'summary-card ' + (gap > 0 ? 'red' : 'green');
-    gapAmount.textContent = gap > 0 ? `−${fmt(gap)}` : '$0';
-    gapNote.textContent   = gap > 0 ? 'Less available under proposed rules' : 'No reduction impact for this profile';
+    if (gap > 0) {
+      gapCard.className = 'summary-card red';
+      gapAmount.textContent = `−${fmt(gap)}`;
+      gapNote.textContent = 'Less available under OBBB rules';
+    } else if (gap < 0) {
+      gapCard.className = 'summary-card green';
+      gapAmount.textContent = `+${fmt(-gap)}`;
+      gapNote.textContent = 'More available under OBBB rules';
+    } else {
+      gapCard.className = 'summary-card green';
+      gapAmount.textContent = '$0';
+      gapNote.textContent = 'No change in borrowing capacity';
+    }
 
     // Table
-    document.getElementById('tableBody').innerHTML = rows.map(r => `
-      <tr>
-        <td>${r.ay}</td>
-        <td>Year ${r.year}</td>
-        <td class="blue">${fmt(r.annCur)}</td>
-        <td class="orange">${fmt(r.annProp)}</td>
-        <td class="${r.reduction > 0 ? 'red' : 'muted'}">${r.reduction > 0 ? '−' + fmt(r.reduction) : '—'}</td>
-        <td class="blue">${fmt(r.cumCur)}</td>
-        <td class="orange">${fmt(r.cumProp)}</td>
-        <td class="blue">${fmt(r.remCur)}</td>
-        <td class="orange">${fmt(r.remProp)}</td>
-      </tr>
-    `).join('');
+    document.getElementById('tableBody').innerHTML = rows.map(r => {
+      let changeCell;
+      if (r.change === 0)      changeCell = `<span class="muted">—</span>`;
+      else if (r.change < 0)   changeCell = `<span class="red">−${fmt(-r.change)}</span>`;
+      else                     changeCell = `<span style="color:#16a34a;font-weight:600">+${fmt(r.change)}</span>`;
+      return `
+        <tr>
+          <td>${r.ay}</td>
+          <td>Year ${r.year}</td>
+          <td class="blue">${fmt(r.annCur)}</td>
+          <td class="orange">${fmt(r.annObbb)}</td>
+          <td style="text-align:right;white-space:nowrap">${changeCell}</td>
+          <td class="blue">${fmt(r.cumCur)}</td>
+          <td class="orange">${fmt(r.cumObbb)}</td>
+          <td class="blue">${fmt(r.remCur)}</td>
+          <td class="orange">${fmt(r.remObbb)}</td>
+        </tr>`;
+    }).join('');
 
     // Notes
     document.getElementById('notesList').innerHTML = sched.notes
