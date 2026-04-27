@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Direct Loans Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+<header class="bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <h1 class="text-2xl font-bold text-gray-900">Direct Loans Calculator</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Aggregate limit reduction schedule · Year-by-year borrowing plan</p>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+  <!-- Disclaimer -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-800">
+    <strong>Disclaimer:</strong> Proposed limits are based on ED rulemaking discussions as of early 2026.
+    Verify all figures against the applicable final rule before advising borrowers.
+  </div>
+
+  <!-- Borrower Profile Form -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Borrower Profile</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Student Type</label>
+        <select id="studentType" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option th:each="t : ${studentTypes}"
+                  th:value="${t.value}"
+                  th:text="${t.label}"
+                  th:selected="${t.value == form.studentType}">
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Program Length (years)</label>
+        <select id="programLength" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option th:each="n : ${#numbers.sequence(1, 6)}"
+                  th:value="${n}"
+                  th:text="${n + (n == 1 ? ' year' : ' years')}"
+                  th:selected="${n == form.programLength}">
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Program Start AY</label>
+        <select id="startYear" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option th:each="y : ${startYearOptions}"
+                  th:value="${y}"
+                  th:text="${y + '–' + #strings.substring('' + (y + 1), 2)}"
+                  th:selected="${y == form.startYear}">
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Already Borrowed ($)</label>
+        <input id="alreadyBorrowed" type="number" min="0" step="500"
+               th:value="${form.alreadyBorrowed}"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div id="summaryCards" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+      <p class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-1">Borrowable — Current Rules</p>
+      <p id="currentBorrowable" class="text-3xl font-bold text-blue-800"
+         th:text="${'$' + #numbers.formatInteger(result.totalCurrentBorrowable, 1, 'COMMA')}"></p>
+      <p class="text-xs text-blue-600 mt-1">Aggregate cap:
+        <span id="aggregateCurrent" th:text="${'$' + #numbers.formatInteger(result.aggregateCurrent, 1, 'COMMA')}"></span>
+      </p>
+      <p id="alreadyBorrowedNote" class="text-xs text-blue-600"
+         th:if="${result.alreadyBorrowed > 0}"
+         th:text="${'$' + #numbers.formatInteger(result.alreadyBorrowed, 1, 'COMMA') + ' already borrowed'}"></p>
+    </div>
+
+    <div class="bg-orange-50 border border-orange-200 rounded-xl p-5">
+      <p class="text-xs font-medium text-orange-600 uppercase tracking-wide mb-1">Borrowable — Proposed Rules</p>
+      <p id="proposedBorrowable" class="text-3xl font-bold text-orange-800"
+         th:text="${'$' + #numbers.formatInteger(result.totalProposedBorrowable, 1, 'COMMA')}"></p>
+      <p class="text-xs text-orange-600 mt-1">Proposed aggregate cap:
+        <span id="aggregateProposed" th:text="${'$' + #numbers.formatInteger(result.aggregateProposed, 1, 'COMMA')}"></span>
+      </p>
+      <p id="aggregateGapNote" class="text-xs text-orange-600"
+         th:if="${result.aggregateCurrent != result.aggregateProposed}"
+         th:text="${'Aggregate reduced by $' + #numbers.formatInteger(result.aggregateCurrent - result.aggregateProposed, 1, 'COMMA')}"></p>
+    </div>
+
+    <div id="gapCard" class="rounded-xl p-5 border"
+         th:classappend="${result.totalCurrentBorrowable != result.totalProposedBorrowable} ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'">
+      <p class="text-xs font-medium uppercase tracking-wide mb-1"
+         th:classappend="${result.totalCurrentBorrowable != result.totalProposedBorrowable} ? 'text-red-600' : 'text-green-600'">
+        Borrowing Gap
+      </p>
+      <p id="gapAmount" class="text-3xl font-bold"
+         th:classappend="${result.totalCurrentBorrowable != result.totalProposedBorrowable} ? 'text-red-800' : 'text-green-800'"
+         th:text="${result.totalCurrentBorrowable > result.totalProposedBorrowable
+                    ? ('−$' + #numbers.formatInteger(result.totalCurrentBorrowable - result.totalProposedBorrowable, 1, 'COMMA'))
+                    : '$0'}">
+      </p>
+      <p id="gapNote" class="text-xs mt-1"
+         th:classappend="${result.totalCurrentBorrowable != result.totalProposedBorrowable} ? 'text-red-600' : 'text-green-600'"
+         th:text="${result.totalCurrentBorrowable > result.totalProposedBorrowable
+                    ? 'Less available under proposed rules'
+                    : 'No reduction impact for this profile'}">
+      </p>
+    </div>
+  </div>
+
+  <!-- Year-by-Year Table -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-800">Year-by-Year Borrowing Schedule</h2>
+      <p class="text-sm text-gray-500 mt-0.5">Comparison of annual limits and cumulative borrowing under current vs. proposed rules.</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200">
+            <th class="px-4 py-3 text-left font-medium text-gray-600 whitespace-nowrap">AY</th>
+            <th class="px-4 py-3 text-left font-medium text-gray-600 whitespace-nowrap">Year</th>
+            <th class="px-4 py-3 text-right font-medium text-blue-700 whitespace-nowrap">Annual (Current)</th>
+            <th class="px-4 py-3 text-right font-medium text-orange-600 whitespace-nowrap">Annual (Proposed)</th>
+            <th class="px-4 py-3 text-right font-medium text-gray-600 whitespace-nowrap">Reduction</th>
+            <th class="px-4 py-3 text-right font-medium text-blue-700 whitespace-nowrap">Cumulative (Current)</th>
+            <th class="px-4 py-3 text-right font-medium text-orange-600 whitespace-nowrap">Cumulative (Proposed)</th>
+            <th class="px-4 py-3 text-right font-medium text-blue-700 whitespace-nowrap">Remaining (Current)</th>
+            <th class="px-4 py-3 text-right font-medium text-orange-600 whitespace-nowrap">Remaining (Proposed)</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="divide-y divide-gray-100">
+          <tr th:each="row : ${result.rows}" class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap" th:text="${row.academicYear}"></td>
+            <td class="px-4 py-3 text-gray-600 whitespace-nowrap" th:text="${'Year ' + row.yearInProgram}"></td>
+            <td class="px-4 py-3 text-right text-blue-700 font-medium whitespace-nowrap"
+                th:text="${'$' + #numbers.formatInteger(row.annualCurrentTotal, 1, 'COMMA')}"></td>
+            <td class="px-4 py-3 text-right text-orange-600 font-medium whitespace-nowrap"
+                th:text="${'$' + #numbers.formatInteger(row.annualProposedTotal, 1, 'COMMA')}"></td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">
+              <span th:if="${row.reductionImpact == 0}" class="text-gray-400">—</span>
+              <span th:if="${row.reductionImpact > 0}" class="text-red-600 font-medium"
+                    th:text="${'−$' + #numbers.formatInteger(row.reductionImpact, 1, 'COMMA')}"></span>
+            </td>
+            <td class="px-4 py-3 text-right text-blue-700 whitespace-nowrap"
+                th:text="${'$' + #numbers.formatInteger(row.cumulativeCurrent, 1, 'COMMA')}"></td>
+            <td class="px-4 py-3 text-right text-orange-600 whitespace-nowrap"
+                th:text="${'$' + #numbers.formatInteger(row.cumulativeProposed, 1, 'COMMA')}"></td>
+            <td class="px-4 py-3 text-right text-blue-700 whitespace-nowrap"
+                th:text="${'$' + #numbers.formatInteger(row.remainingAggregateCurrent, 1, 'COMMA')}"></td>
+            <td class="px-4 py-3 text-right text-orange-600 whitespace-nowrap"
+                th:text="${'$' + #numbers.formatInteger(row.remainingAggregateProposed, 1, 'COMMA')}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Regulation Notes -->
+  <div id="regulationNotes" class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+    <h3 class="text-sm font-semibold text-amber-800 mb-2">Regulatory Notes</h3>
+    <ul class="space-y-1">
+      <li th:each="note : ${result.regulationNotes}" class="text-sm text-amber-700 flex gap-2">
+        <span class="mt-0.5 shrink-0">•</span>
+        <span th:text="${note}"></span>
+      </li>
+    </ul>
+  </div>
+
+</main>
+
+<script>
+  const fmt = n => '$' + n.toLocaleString('en-US');
+
+  async function recalculate() {
+    const form = {
+      studentType: document.getElementById('studentType').value,
+      programLength: parseInt(document.getElementById('programLength').value),
+      startYear: parseInt(document.getElementById('startYear').value),
+      alreadyBorrowed: parseInt(document.getElementById('alreadyBorrowed').value) || 0
+    };
+
+    const res = await fetch('/api/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    });
+    const data = await res.json();
+
+    // Update summary cards
+    document.getElementById('currentBorrowable').textContent = fmt(data.totalCurrentBorrowable);
+    document.getElementById('proposedBorrowable').textContent = fmt(data.totalProposedBorrowable);
+    document.getElementById('aggregateCurrent').textContent = fmt(data.aggregateCurrent);
+    document.getElementById('aggregateProposed').textContent = fmt(data.aggregateProposed);
+
+    const gap = data.totalCurrentBorrowable - data.totalProposedBorrowable;
+    const gapCard = document.getElementById('gapCard');
+    const gapAmount = document.getElementById('gapAmount');
+    const gapNote = document.getElementById('gapNote');
+    if (gap > 0) {
+      gapCard.className = 'rounded-xl p-5 border bg-red-50 border-red-200';
+      gapAmount.className = 'text-3xl font-bold text-red-800';
+      gapAmount.textContent = '−' + fmt(gap);
+      gapNote.className = 'text-xs mt-1 text-red-600';
+      gapNote.textContent = 'Less available under proposed rules';
+    } else {
+      gapCard.className = 'rounded-xl p-5 border bg-green-50 border-green-200';
+      gapAmount.className = 'text-3xl font-bold text-green-800';
+      gapAmount.textContent = '$0';
+      gapNote.className = 'text-xs mt-1 text-green-600';
+      gapNote.textContent = 'No reduction impact for this profile';
+    }
+
+    // Update table
+    const tbody = document.getElementById('resultsBody');
+    tbody.innerHTML = data.rows.map(row => `
+      <tr class="hover:bg-gray-50 transition-colors">
+        <td class="px-4 py-3 font-medium text-gray-800 whitespace-nowrap">${row.academicYear}</td>
+        <td class="px-4 py-3 text-gray-600 whitespace-nowrap">Year ${row.yearInProgram}</td>
+        <td class="px-4 py-3 text-right text-blue-700 font-medium whitespace-nowrap">${fmt(row.annualCurrentTotal)}</td>
+        <td class="px-4 py-3 text-right text-orange-600 font-medium whitespace-nowrap">${fmt(row.annualProposedTotal)}</td>
+        <td class="px-4 py-3 text-right whitespace-nowrap">
+          ${row.reductionImpact === 0
+            ? '<span class="text-gray-400">—</span>'
+            : `<span class="text-red-600 font-medium">−${fmt(row.reductionImpact)}</span>`}
+        </td>
+        <td class="px-4 py-3 text-right text-blue-700 whitespace-nowrap">${fmt(row.cumulativeCurrent)}</td>
+        <td class="px-4 py-3 text-right text-orange-600 whitespace-nowrap">${fmt(row.cumulativeProposed)}</td>
+        <td class="px-4 py-3 text-right text-blue-700 whitespace-nowrap">${fmt(row.remainingAggregateCurrent)}</td>
+        <td class="px-4 py-3 text-right text-orange-600 whitespace-nowrap">${fmt(row.remainingAggregateProposed)}</td>
+      </tr>
+    `).join('');
+
+    // Update regulation notes
+    const notesList = document.querySelector('#regulationNotes ul');
+    notesList.innerHTML = data.regulationNotes.map(note =>
+      `<li class="text-sm text-amber-700 flex gap-2"><span class="mt-0.5 shrink-0">•</span><span>${note}</span></li>`
+    ).join('');
+  }
+
+  ['studentType', 'programLength', 'startYear', 'alreadyBorrowed'].forEach(id => {
+    document.getElementById(id).addEventListener('change', recalculate);
+  });
+</script>
+
+</body>
+</html>
